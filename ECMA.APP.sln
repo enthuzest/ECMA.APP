@@ -12,8 +12,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{320D9019-408F-4609-8FA7-20F6E2D8084D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cicd", "cicd", "{E13CC0E9-63EC-458C-87F5-225E19D799C2}"
+	ProjectSection(SolutionItems) = preProject
+		cicd\buildDeploy.yml = cicd\buildDeploy.yml
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECMA.Database", "src\Database\ECMA.Database.csproj", "{B4C53AD5-A520-4045-8C5F-E243358DC9C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECMA.Database", "src\Database\ECMA.Database.csproj", "{B4C53AD5-A520-4045-8C5F-E243358DC9C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
