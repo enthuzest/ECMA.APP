@@ -8,11 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Scripts\tbl_Contract.sql" />
+    <None Remove="Scripts\Script001-createTablesAndDependecies.sql" />
+    <None Remove="Scripts\Script002-createStoredProcedure.sql" />
+    <None Remove="Scripts\Script003-insertDatacs.sql" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Scripts\tbl_Contract.sql" />
+    <EmbeddedResource Include="Scripts\Script003-insertDatacs.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script002-createStoredProcedure.sql" />
+    <EmbeddedResource Include="Scripts\Script001-createTablesAndDependecies.sql" />
   </ItemGroup>
 
   <ItemGroup>
