@@ -33,12 +33,13 @@ namespace ECMA.APP
                 Contract contractData = System.Text.Json.JsonSerializer.Deserialize<Contract>(json);
                 if(contractData.ContractId != null)
                 {
-                    log.LogInformation("Sucessfully deserialze the message");
+                    log.LogInformation("Successfully deserialze the message");
 
                     await _ecmaService.ProcessMessageAsync(contractData);
+                    return;
                 }
 
-                log.LogInformation("Sucessfully deserialze the message, but ContractId is null");
+                log.LogInformation("Successfully deserialze the message, but ContractId is null");
 
             }
             catch (JsonSerializationException ex)

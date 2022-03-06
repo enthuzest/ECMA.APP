@@ -6,6 +6,9 @@ using ECMA.APP.Models;
 using Microsoft.Extensions.Logging;
 using Azure.Messaging.ServiceBus;
 using System;
+using ECMA.APP.Repository;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ECMA.App.Test
 {
@@ -13,27 +16,50 @@ namespace ECMA.App.Test
     {
         private readonly IECMAService _ecmaServices;
         private readonly ILogger _logger;
+        private readonly IECMARepo _repo;
         private readonly string json;
+        private readonly string wrongJson;
         private readonly ServiceBusReceivedMessage _message;
-        private BinaryData xx;
+        private readonly BinaryData xx;
+        private readonly BinaryData yy;
+        private readonly ServiceBusReceivedMessage _wrongMessage;
 
         public ContractIngestionTests()
         {
             _ecmaServices = Substitute.For<IECMAService>();
             _logger = Substitute.For<ILogger>();
+            _repo = Substitute.For<IECMARepo>();
 
-            json = "{\"ContractId\": \"12458\"}";
+            json = "{\"ContractId\": \"12458\"}";         
             xx = new BinaryData(json);
             _message = ServiceBusModelFactory.ServiceBusReceivedMessage(body: xx);
+
+            wrongJson = "{\"ContractId\": 12459}";
+            yy = new BinaryData(wrongJson);
+            _wrongMessage = ServiceBusModelFactory.ServiceBusReceivedMessage(body: yy);
         }
 
         [Fact]
-        public void ProcessMessageAsync_Success()
+        public async Task ProcessMessageAsync_Success()
         {
-            ContractIngestion obj = new ContractIngestion(_ecmaServices);
-            var result = obj.IngestMessage(_message, _logger);
+            //Arrange
+            ContractIngestion obj = new(_ecmaServices);
 
-            _ecmaServices.Received(1).ProcessMessageAsync(Arg.Any<Contract>());
+            //Act
+            await obj.IngestMessage(_message, _logger);
+
+            //Assert
+            await _ecmaServices.Received(1).ProcessMessageAsync(Arg.Any<Contract>());
+            //_repo.Received(1).PushContractsToDb(Arg.Any<TblContract>());
+
+        }
+
+        [Fact]
+        public async Task getErrorAsync()
+        {
+            ContractIngestion obj = new(_ecmaServices);
+
+            await Assert.ThrowsAsync<System.Text.Json.JsonException>(() => obj.IngestMessage(_wrongMessage, _logger));
 
         }
     }
