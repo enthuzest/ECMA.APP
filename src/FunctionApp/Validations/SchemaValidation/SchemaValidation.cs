@@ -25,7 +25,7 @@ namespace ECMA.APP.Validations.SchemaValidation
 
         public static ICollection<ValidationError> Validate(string messageToValidate)
         {
-            var schema = JsonSchema.FromJsonAsync(ReadSchema("")).Result;
+            var schema = JsonSchema.FromJsonAsync(ReadSchema("ECMA.APP.Validations.SchemaValidation.contract-schema.json")).Result;
 
             return schema.Validate(messageToValidate);
         }
