@@ -2,25 +2,32 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
+using ECMA.APP.Exceptions;
 using ECMA.APP.Models;
 using ECMA.APP.Services;
+using ECMA.APP.Validations.SchemaValidation;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace ECMA.APP
+namespace ECMA.APP.Functions
 {
     public class ContractIngestion
     {
         private readonly IECMAService _ecmaService;
+        private readonly ISchemaValidation _schemaValidation;
 
-        public ContractIngestion(IECMAService ecmaService)
+        public ContractIngestion(IECMAService ecmaService, ISchemaValidation schemaValidation)
         {
             _ecmaService = ecmaService;
+            _schemaValidation = schemaValidation;
         }
 
         [FunctionName("ContractIngestion")]
-        public async Task IngestMessage([ServiceBusTrigger("%EcmaTopicName%", "%EcmaSubscription%", Connection = "servicebusConnection")]
+        public async Task IngestMessage([ServiceBusTrigger(
+            "%EcmaTopicName%",
+            "%EcmaSubscription%",
+            Connection = "servicebusConnection")]
             ServiceBusReceivedMessage message,
             ILogger log)
         {
@@ -30,8 +37,13 @@ namespace ECMA.APP
 
             try
             {
-                Contract contractData = System.Text.Json.JsonSerializer.Deserialize<Contract>(json);
-                if(contractData.ContractId != null)
+                //validate
+                _schemaValidation.ValidateAndThrow(json);
+
+                //deserialize
+                Contract contractData = JsonConvert.DeserializeObject<Contract>(json);
+
+                if (contractData.ContractId != null)
                 {
                     log.LogInformation("Successfully deserialze the message");
 
@@ -41,6 +53,11 @@ namespace ECMA.APP
 
                 log.LogInformation("Successfully deserialze the message, but ContractId is null");
 
+            }
+            catch(JsonSchemaException ex)
+            {
+                log.LogError(ex, "Schema Exception");
+                throw;
             }
             catch (JsonSerializationException ex)
             {

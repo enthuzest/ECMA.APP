@@ -1,5 +1,5 @@
 using Xunit;
-using ECMA.APP;
+using ECMA.APP.Functions;
 using NSubstitute;
 using ECMA.APP.Services;
 using ECMA.APP.Models;
@@ -8,6 +8,7 @@ using Azure.Messaging.ServiceBus;
 using System;
 using ECMA.APP.Repository;
 using System.Threading.Tasks;
+using ECMA.APP.Validations.SchemaValidation;
 using Newtonsoft.Json;
 
 namespace ECMA.App.Test
@@ -17,6 +18,7 @@ namespace ECMA.App.Test
         private readonly IECMAService _ecmaServices;
         private readonly ILogger _logger;
         private readonly IECMARepo _repo;
+        private readonly ISchemaValidation _schemaValidation;
         private readonly string json;
         private readonly string wrongJson;
         private readonly ServiceBusReceivedMessage _message;
@@ -29,8 +31,9 @@ namespace ECMA.App.Test
             _ecmaServices = Substitute.For<IECMAService>();
             _logger = Substitute.For<ILogger>();
             _repo = Substitute.For<IECMARepo>();
+            _schemaValidation = Substitute.For<ISchemaValidation>();
 
-            json = "{\"ContractId\": \"12458\"}";         
+            json = "{\"CONTRACT_ID\": \"12458\"}";         
             xx = new BinaryData(json);
             _message = ServiceBusModelFactory.ServiceBusReceivedMessage(body: xx);
 
@@ -43,7 +46,7 @@ namespace ECMA.App.Test
         public async Task ProcessMessageAsync_Success()
         {
             //Arrange
-            ContractIngestion obj = new(_ecmaServices);
+            ContractIngestion obj = new(_ecmaServices, _schemaValidation);
 
             //Act
             await obj.IngestMessage(_message, _logger);
@@ -55,11 +58,11 @@ namespace ECMA.App.Test
         }
 
         [Fact]
-        public async Task getErrorAsync()
+        public async Task GetErrorAsync()
         {
-            ContractIngestion obj = new(_ecmaServices);
+            ContractIngestion obj = new(_ecmaServices, _schemaValidation);
 
-            await Assert.ThrowsAsync<System.Text.Json.JsonException>(() => obj.IngestMessage(_wrongMessage, _logger));
+            await Assert.ThrowsAsync<JsonException>(() => obj.IngestMessage(_wrongMessage, _logger));
 
         }
     }

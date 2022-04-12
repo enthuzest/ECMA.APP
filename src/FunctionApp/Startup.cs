@@ -2,6 +2,7 @@
 using ECMA.APP.Models;
 using ECMA.APP.Repository;
 using ECMA.APP.Services;
+using ECMA.APP.Validations.SchemaValidation;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,7 @@ namespace ECMA.APP
             builder.Services.AddScoped<IECMARepo, ECMARepo>();
             builder.Services.AddScoped<IECMAService, ECMAService>();
             builder.Services.AddScoped<IContractMapper, ContractMapper>();
+            builder.Services.AddScoped<ISchemaValidation, SchemaValidation>();
 
             string connectionString = Environment.GetEnvironmentVariable("ConnectionString");
             builder.Services.AddDbContext<EcmaContext>(
