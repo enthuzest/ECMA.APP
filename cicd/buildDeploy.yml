@@ -6,7 +6,7 @@
 trigger: none
 
 variables:
-  azureSubscription: '70b939e5-0866-4bdf-989d-a9ac3b41d0c7'
+  azureSubscription: 'db371aa4-50d0-45d5-866b-3638e8a8e53d'
   functionAppName: 'ecma-dev'
   vmImageName: 'vs2017-win2016'
   workingDirectory: '$(System.DefaultWorkingDirectory)/src/FunctionApp'
