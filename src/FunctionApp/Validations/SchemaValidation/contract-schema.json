@@ -1,0 +1,55 @@
+﻿{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "CONTRACT_ID": {
+      "type": "string",
+      "minLength": 4
+    },
+    "CREATED_DATETIME": {
+      "type": "string",
+      "pattern": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z",
+      "maxLength": 20,
+      "minLength": 1
+    },
+    "END_DATETIME": {
+      "type": "string"
+    },
+    "UPDATE_DATETIME": {
+      "type": "string"
+    },
+    "PRICE": {
+      "type": "number"
+    },
+    "OWNER": {
+      "type": "string"
+    },
+    "METADATA": {
+      "type": "object",
+      "properties": {
+        "MESSAGE_RECEIVED": {
+          "type": "string"
+        },
+        "VERSION": {
+          "type": "string",
+          "maxLength": 8,
+          "minLength": 1,
+          "enum": [ "20200614" ]
+        }
+      },
+      "required": [
+        "MESSAGE_RECEIVED",
+        "VERSION"
+      ]
+    }
+  },
+  "required": [
+    "CONTRACT_ID",
+    "CREATED_DATETIME",
+    "END_DATETIME",
+    "UPDATE_DATETIME",
+    "PRICE",
+    "OWNER",
+    "METADATA"
+  ]
+}

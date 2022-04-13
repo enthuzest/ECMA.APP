@@ -7,9 +7,9 @@ namespace ECMA.APP.Models
     {
         [JsonProperty("CONTRACT_ID")]
         public string ContractId { get; set; }
-        [JsonProperty("CREATED_DATE")]
+        [JsonProperty("CREATED_DATETIME")]
         public DateTime CreatedDate { get; set; }
-        [JsonProperty("END_DATE")]
+        [JsonProperty("END_DATETIME")]
         public DateTime EndDate { get; set; }
         [JsonProperty("UPDATE_DATETIME")]
         public DateTime UpdateDatetime { get; set; }
