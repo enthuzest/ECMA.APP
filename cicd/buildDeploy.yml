@@ -1,7 +1,6 @@
 trigger: none
 
 variables:
-  azureSubscription: 'db371aa4-50d0-45d5-866b-3638e8a8e53d'
   functionAppName: 'ecma-dev'
   vmImageName: 'vs2017-win2016'
   workingDirectory: '$(System.DefaultWorkingDirectory)/src/FunctionApp'
@@ -66,3 +65,54 @@ stages:
     - publish: $(Build.ArtifactStagingDirectory)/db_$(Build.BuildId).zip
       displayName: Publish DB Artifact
       artifact: db_drop
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  condition: succeeded()
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy App
+    environment: 'development'
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureFunctionApp@1
+            displayName: 'Azure functions app deploy'
+            inputs:
+              azureSubscription: 'azure-SN'
+              appType: functionApp
+              appName: $(functionAppName)
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+
+  - deployment: Deploy
+    displayName: Deploy DB
+    environment: DevDb
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            displayName: Download DbUpDemo artifact
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'db_drop'
+              downloadPath: '$(System.ArtifactsDirectory)/DbUpExtract'
+          - task: ExtractFiles@1
+            displayName: Extract Zip
+            inputs:
+              archiveFilePatterns: '$(System.ArtifactsDirectory)/**/*.zip'
+              destinationFolder: '$(System.ArtifactsDirectory)/DbUpExtract'
+              cleanDestinationFolder: false
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'custom'
+              custom: 'ECMA.Database.dll'
+              workingDirectory: '$(System.ArtifactsDirectory)/DbUpExtract'
