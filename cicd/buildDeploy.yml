@@ -72,7 +72,7 @@ stages:
   condition: succeeded()
 
   jobs:
-  - deployment: Deploy
+  - deployment: DeployApp
     displayName: Deploy App
     environment: 'development'
     pool:
@@ -89,7 +89,7 @@ stages:
               appName: $(functionAppName)
               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
 
-  - deployment: Deploy
+  - deployment: DeployDb
     displayName: Deploy DB
     environment: DevDb
     pool:
