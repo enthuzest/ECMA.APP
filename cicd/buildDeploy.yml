@@ -65,4 +65,4 @@ stages:
       artifact: drop
 
     - publish: $(Build.ArtifactStagingDirectory)/db_$(Build.BuildId).zip
-      artifact: drop
+      artifact: db_drop
