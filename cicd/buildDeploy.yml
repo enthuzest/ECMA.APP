@@ -10,6 +10,7 @@ variables:
   functionAppName: 'ecma-dev'
   vmImageName: 'vs2017-win2016'
   workingDirectory: '$(System.DefaultWorkingDirectory)/src/FunctionApp'
+  dbWorkingDirectory: '$(System.DefaultWorkingDirectory)/src/Database'
 
 stages:
 - stage: Build
@@ -28,13 +29,20 @@ stages:
         version: '6.x'
         includePreviewVersions: true
     - task: DotNetCoreCLI@2
-      displayName: Build
+      displayName: Build Function App
       inputs:
         command: 'build'
         projects: |
           $(workingDirectory)/*.csproj
         arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
 
+    - task: DotNetCoreCLI@2
+      displayName: Build Database App
+      inputs:
+        command: 'build'
+        projects: |
+          $(dbWorkingDirectory)/*.csproj
+        arguments: --output $(System.DefaultWorkingDirectory)/publish_db_output --configuration Release
     - task: ArchiveFiles@2
       displayName: 'Archive files'
       inputs:
@@ -44,7 +52,19 @@ stages:
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
 
+    - task: ArchiveFiles@2
+      displayName: 'Archive Db files'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_db_output'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/db_$(Build.BuildId).zip
+        replaceExistingArchive: true
+
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      artifact: drop
+
+    - publish: $(Build.ArtifactStagingDirectory)/db_$(Build.BuildId).zip
       artifact: drop
 
 - stage: Deploy
@@ -71,3 +91,4 @@ stages:
               appType: functionApp
               appName: $(functionAppName)
               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+       
