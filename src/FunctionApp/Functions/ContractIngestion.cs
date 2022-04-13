@@ -38,10 +38,14 @@ namespace ECMA.APP.Functions
             try
             {
                 //validate
+                log.LogInformation("Schema Validation Started");
                 _schemaValidation.ValidateAndThrow(json);
+                log.LogInformation("Schema Validation Completed");
 
                 //deserialize
+                log.LogInformation("Deserialization Started");
                 Contract contractData = JsonConvert.DeserializeObject<Contract>(json);
+                log.LogInformation("Deserialization Completed");
 
                 if (contractData.ContractId != null)
                 {
