@@ -104,11 +104,11 @@ stages:
               buildType: 'current'
               downloadType: 'single'
               artifactName: 'db_drop'
-              downloadPath: '$(System.ArtifactsDirectory)/DbUpExtract'
+              downloadPath: '$(System.ArtifactsDirectory)/DbUpArtifact'
           - task: ExtractFiles@1
             displayName: Extract Zip
             inputs:
-              archiveFilePatterns: '$(System.ArtifactsDirectory)/DbUpExtract/*.zip'
+              archiveFilePatterns: '$(System.ArtifactsDirectory)/DbUpArtifact/*.zip'
               destinationFolder: '$(System.ArtifactsDirectory)/DbUpExtract'
               cleanDestinationFolder: false
           - task: DotNetCoreCLI@2
