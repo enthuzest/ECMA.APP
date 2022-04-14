@@ -103,25 +103,20 @@ stages:
         deploy:
           steps:
           - task: DownloadBuildArtifacts@0
+            enabled: false
             displayName: Download DbUpDemo artifact
             inputs:
               buildType: 'current'
               downloadType: 'single'
               artifactName: 'db_drop'
               downloadPath: '$(System.ArtifactsDirectory)/DbUpArtifact'
-          - task: PowerShell@2
-            inputs:
-              targetType: 'inline'
-              script: 'ls $(System.ArtifactsDirectory)'
           - task: ExtractFiles@1
-            enabled: false
             displayName: Extract Zip
             inputs:
-              archiveFilePatterns: '$(System.ArtifactsDirectory)/DbUpArtifact/*.zip'
+              archiveFilePatterns: '$(Pipeline.Workspace)/db_drop/db_$(Build.BuildId).zip'
               destinationFolder: '$(System.ArtifactsDirectory)/DbUpExtract'
               cleanDestinationFolder: false
           - task: DotNetCoreCLI@2
-            enabled: false
             inputs:
               command: 'custom'
               custom: 'ECMA.Database.dll'
