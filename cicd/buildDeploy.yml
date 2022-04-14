@@ -116,6 +116,13 @@ stages:
               archiveFilePatterns: '$(Pipeline.Workspace)/db_drop/db_$(Build.BuildId).zip'
               destinationFolder: '$(System.ArtifactsDirectory)/DbUpExtract'
               cleanDestinationFolder: false
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '6.x'
+              includePreviewVersions: true
+            displayName: Use .NET 6.x
+            
           - task: DotNetCoreCLI@2
             inputs:
               command: 'custom'
