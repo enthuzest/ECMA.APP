@@ -72,23 +72,6 @@ stages:
   condition: succeeded()
 
   jobs:
-  - deployment: DeployApp
-    displayName: Deploy App
-    environment: 'development'
-    pool:
-      vmImage: $(vmImageName)
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureFunctionApp@1
-            displayName: 'Azure functions app deploy'
-            inputs:
-              azureSubscription: 'azure-SN'
-              appType: functionApp
-              appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
-
   - deployment: DeployDb
     displayName: Deploy DB
     environment: DevDb
@@ -117,3 +100,21 @@ stages:
               custom: 'ECMA.Database.dll'
               workingDirectory: '$(System.ArtifactsDirectory)/DbUpExtract'
             displayName: Execute Scripts
+  
+  - deployment: DeployApp
+    dependsOn: DeployDb
+    displayName: Deploy App
+    environment: 'development'
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureFunctionApp@1
+            displayName: 'Azure functions app deploy'
+            inputs:
+              azureSubscription: 'azure-SN'
+              appType: functionApp
+              appName: $(functionAppName)
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
