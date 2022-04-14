@@ -1,15 +1,10 @@
-# .NET Core Function App to Windows on Azure
-# Build a .NET Core function app and deploy it to Azure as a Windows function App.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/en-us/azure/devops/pipelines/languages/dotnet-core
-
 trigger: none
 
 variables:
-  azureSubscription: '70b939e5-0866-4bdf-989d-a9ac3b41d0c7'
   functionAppName: 'ecma-dev'
   vmImageName: 'vs2017-win2016'
   workingDirectory: '$(System.DefaultWorkingDirectory)/src/FunctionApp'
+  dbWorkingDirectory: '$(System.DefaultWorkingDirectory)/src/Database'
 
 stages:
 - stage: Build
@@ -27,16 +22,26 @@ stages:
         packageType: 'sdk'
         version: '6.x'
         includePreviewVersions: true
+      displayName: Use .NET 6.x
+
     - task: DotNetCoreCLI@2
-      displayName: Build
+      displayName: Build Function App
       inputs:
         command: 'build'
         projects: |
           $(workingDirectory)/*.csproj
         arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
 
+    - task: DotNetCoreCLI@2
+      displayName: Build Database App
+      inputs:
+        command: 'build'
+        projects: |
+          $(dbWorkingDirectory)/*.csproj
+        arguments: --output $(System.DefaultWorkingDirectory)/publish_db_output --configuration Release
+
     - task: ArchiveFiles@2
-      displayName: 'Archive files'
+      displayName: 'Archive Function App Files'
       inputs:
         rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_output'
         includeRootFolder: false
@@ -44,8 +49,22 @@ stages:
         archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
         replaceExistingArchive: true
 
+    - task: ArchiveFiles@2
+      displayName: 'Archive DB files'
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_db_output'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/db_$(Build.BuildId).zip
+        replaceExistingArchive: true
+
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: Pusblish App Artifact
       artifact: drop
+
+    - publish: $(Build.ArtifactStagingDirectory)/db_$(Build.BuildId).zip
+      displayName: Publish DB Artifact
+      artifact: db_drop
 
 - stage: Deploy
   displayName: Deploy stage
@@ -53,21 +72,48 @@ stages:
   condition: succeeded()
 
   jobs:
-  - deployment: Deploy
-    displayName: Deploy
+  - deployment: DeployApp
+    displayName: Deploy App
     environment: 'development'
     pool:
       vmImage: $(vmImageName)
-
     strategy:
       runOnce:
         deploy:
-
           steps:
           - task: AzureFunctionApp@1
             displayName: 'Azure functions app deploy'
             inputs:
-              azureSubscription: '$(azureSubscription)'
+              azureSubscription: 'azure-SN'
               appType: functionApp
               appName: $(functionAppName)
               package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+
+  - deployment: DeployDb
+    displayName: Deploy DB
+    environment: DevDb
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: ExtractFiles@1
+            displayName: Extract Zip
+            inputs:
+              archiveFilePatterns: '$(Pipeline.Workspace)/db_drop/db_$(Build.BuildId).zip'
+              destinationFolder: '$(System.ArtifactsDirectory)/DbUpExtract'
+              cleanDestinationFolder: false
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '6.x'
+              includePreviewVersions: true
+            displayName: Use .NET 6.x
+            
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'custom'
+              custom: 'ECMA.Database.dll'
+              workingDirectory: '$(System.ArtifactsDirectory)/DbUpExtract'
+            displayName: Execute Scripts
