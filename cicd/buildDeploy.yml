@@ -108,7 +108,7 @@ stages:
           - task: ExtractFiles@1
             displayName: Extract Zip
             inputs:
-              archiveFilePatterns: '$(System.ArtifactsDirectory)/**/*.zip'
+              archiveFilePatterns: '**/*.zip'
               destinationFolder: '$(System.ArtifactsDirectory)/DbUpExtract'
               cleanDestinationFolder: false
           - task: DotNetCoreCLI@2
